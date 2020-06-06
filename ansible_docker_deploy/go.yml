@@ -1,0 +1,31 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Set authorized key taken from file
+      authorized_key:
+                user: "{{ ansible_user }}"
+                state: present
+                key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: ['lvm2', 'ntp', 'sudo', 'ebtables', 'arptables', 'wget', 'git', 'sshpass', 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python', 'python-pip' ]
+
+    - name: fix iptables for kuber
+      raw: update-alternatives --set iptables /usr/sbin/iptables-legacy && \
+           update-alternatives --set arptables /usr/sbin/arptables-legacy && \
+           update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy && \
+           update-alternatives --set ebtables /usr/sbin/ebtables-legacy
+
+    - name: add lc_all
+      raw: echo "export LC_ALL=en_us.utf-8" >> /root/.bashrc
+#    - name: add addresses to hosts file
+ #     raw: echo "10.0.0.127 master1 " >> /etc/hosts && \
+  #         echo "10.0.0.152 master2 " >> /etc/hosts && \
+   #        echo "10.0.0.113 master3 " >> /etc/hosts && \
+    #       echo "10.0.0.158 node1 " >> /etc/hosts && \
+     #      echo "10.0.0.130 node2 " >> /etc/hosts && \
+      #     echo "10.0.0.147 node3 " >> /etc/hosts

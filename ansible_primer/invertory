@@ -1,0 +1,12 @@
+[all:vars]
+ansible_user='ctm'
+ansible_become='yes'
+ansible_become_pass='1'
+ansible_become_method='sudo'
+db_user='redmine'
+db_password='1'
+db_name='redmine'
+github_token='ANUPGEHS226ATHPY4CL6ZBS6LDDR6'
+ruby_version='ruby-2.6.3'
+[stage_host]
+10.0.0.142

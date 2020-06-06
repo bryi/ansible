@@ -1,0 +1,24 @@
+---
+- name: Ensure a 'sudo' group
+  group:
+    name: sudo
+    state: present
+
+
+- name: add a rails user
+  user:
+           name: rubyworker
+           shell: /bin/bash
+           groups: sudo
+           append: yes
+           password: 1
+
+- name: upload ssh
+  authorized_key:
+                  user: rubyworker
+                  state: present
+                  manage_dir: yes
+                  key: "{{ lookup ('file', '/home/bryi/.ssh/id_rsa.pub')}}"
+ 
+
+# tasks file for rails_deploy

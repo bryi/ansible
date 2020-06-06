@@ -1,0 +1,17 @@
+---
+- hosts: stage_host
+  tasks: 
+         - name: add a bryi user
+           user:
+                  name: bryi
+                  comment: 'bryi'
+                  shell: /bin/bash
+                  groups: sudo
+                  append: yes
+                  password: 1
+         - name: upload ssh
+           authorized_key:
+                  user: bryi
+                  state: present
+                  manage_dir: yes
+                  key: "{{ lookup ('file', '/home/bryi/.ssh/id_rsa.pub')}}"    

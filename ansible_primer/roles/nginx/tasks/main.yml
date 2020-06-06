@@ -1,0 +1,8 @@
+---
+- name: enable ans start service nginx  
+  systemd:
+	name: nginx
+	state: started
+	enabled: yes
+
+# tasks file for nginx

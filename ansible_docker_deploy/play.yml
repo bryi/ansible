@@ -1,0 +1,67 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Set authorized key taken from file
+      authorized_key:
+                user: "{{ ansible_user }}"
+                state: present
+                key: "{{ lookup('file', '/home/$USER/.ssh/id_rsa.pub') }}"
+
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python', 'python-pip', 'python3', 'python3-pip' ]
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+   
+    - name: Copy the registry conf
+      copy:
+         src: files/daemon.json
+         dest: /etc/docker/daemon.json
+
+    - name: configure docker registry address in daemon.json
+      raw: sed -i 's/docker_registry_address/{{ docker_registry_ip_port }}/' /etc/docker/daemon.json
+
+    - name: add user to docker group
+      raw: sudo usermod -aG docker $USER
+
+    - name: restart docker
+      systemd:
+         name: docker
+         state: restarted    
+    
+    - name: install docker-py library for python
+      raw: pip install docker
+   
+    - name: log into private docker registry
+      docker_login:
+           registry: "{{ docker_registry_ip_port }}"
+           username: "{{ docker_registry_login }}"
+           password: "{{ docker_registry_password}}"
+
+    - name: install nginx as load balancer on docker swarm master host
+      apt: name=nginx state=latest update_cache=yes
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['cluster_master'] }}"
+      run_once: true
+
+    - name: Copy the nginx conf
+      copy:
+         src: files/load_balancer_nginx_conf_template.conf
+         dest: /etc/nginx/conf.d/load_balancer_nginx_conf_template.conf
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['cluster_master'] }}"
+      run_once: true

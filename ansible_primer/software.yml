@@ -1,0 +1,10 @@
+---
+- hosts: stage_host
+  tasks:
+          - name: add a list os software
+            apt:
+                  name: "{{ packages }}"
+                  state: present
+            vars:
+                  packages:
+                         - htop

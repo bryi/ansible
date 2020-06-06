@@ -1,0 +1,40 @@
+---
+- name: Rails Deploy Playbook
+  hosts: all
+  remote_user: "{{ ansible_user }}"
+  become: true
+  gather_facts: no
+  pre_tasks:
+
+      - name: 'install python2'
+        raw: sudo apt-get -y install python python-pip       
+      
+      - name: install python modules
+        raw: pip install psycopg2 
+      
+      - name: Update system
+        apt: update_cache=yes
+
+      - name: Upgrade system
+        raw: sudo apt-get upgrade -y
+
+      - name: Update system
+        raw: sudo apt-get update
+      
+      - name: add user to sudo group
+        raw: sudo usermod -aG sudo {{ ansible_user }}  
+ 
+      - name: install app dependencies
+        apt:
+           name: git,nginx,postgresql,postgresql-contrib,libpq-dev,autoconf,automake,bison,libffi-dev,libgdbm-dev,libncurses5-dev,libsqlite3-dev,libtool,libyaml-dev,pkg-config,sqlite3,zlib1g-dev,libgmp-dev,libreadline-dev,libssl-dev
+           state: latest
+           
+  roles:
+    - rails_deploy
+    - postgresql
+    - { role: rvm.ruby,
+        tags: ruby,
+        rvm1_rubies: ['{{ ruby_version }}'],        
+        rvm1_ruby_install_flags: '--autolibs=0'
+      }
+  #  - GithubActions

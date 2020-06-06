@@ -1,0 +1,16 @@
+[all:vars]
+ansible_user='root'
+#ansible_become='yes'
+ansible_become_password='1'
+#ansible_become_method='sudo'
+docker_registry_ip_port='10.0.0.25:5000' #ip_address:port
+docker_registry_login='ctm'
+docker_registry_password='ctm'
+
+[all]
+10.0.0.127
+10.0.0.152
+10.0.0.113
+10.0.0.158
+10.0.0.130
+10.0.0.147
